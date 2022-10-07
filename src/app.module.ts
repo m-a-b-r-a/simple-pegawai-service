@@ -16,7 +16,7 @@ const envConfig = process.env;
     synchronize:true,
     autoLoadEntities:true,
     logging:true,
-    dropSchema:true
+    dropSchema:false
 
   }),PegawaiModule],
   controllers: [AppController],

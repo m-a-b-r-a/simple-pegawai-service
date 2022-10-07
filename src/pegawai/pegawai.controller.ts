@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PegawaiService } from './pegawai.service';
 import { CreatePegawaiDto } from './dto/create-pegawai.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 import { Pegawai } from './entities/pegawai.entity';
+import { FilterPegawaiDto } from './dto/filter-pegawai.dto';
 
 @Controller('pegawai')
 export class PegawaiController {
@@ -14,7 +15,10 @@ export class PegawaiController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query() filter:FilterPegawaiDto) {
+    if(Object.keys(filter).length > 0){
+      return this.pegawaiService.filter(filter);
+    }
     return this.pegawaiService.findAll();
   }
 

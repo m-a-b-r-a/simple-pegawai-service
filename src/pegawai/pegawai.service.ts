@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { CreatePegawaiDto } from './dto/create-pegawai.dto';
+import { FilterPegawaiDto } from './dto/filter-pegawai.dto';
 import { UpdatePegawaiDto } from './dto/update-pegawai.dto';
 import { Pegawai } from './entities/pegawai.entity';
 
@@ -17,11 +18,33 @@ export class PegawaiService {
   }
 
   async findAll() {
-    return await this.pegawaiRepo.find();
+    return await this.pegawaiRepo.find(); 
   }
 
   async findOne(id: number):Promise<Pegawai> {
-    return await this.pegawaiRepo.findOne({where:{id}});
+    const found = await this.pegawaiRepo.findOne({where:{id}});
+    if(!found){
+      throw new NotFoundException(`Data Pegawai dengan id :${id} tidak ditemukan`)
+    }
+    return found;
+  }
+
+  async filter(filter:FilterPegawaiDto){
+    const {fullName,email,phoneNumber,status} = filter;
+ 
+    if(fullName || email || phoneNumber || status){
+
+      return await this.pegawaiRepo.find({
+        where:[
+          {
+            fullName:Like(`%${fullName}%`),
+            email:email,
+            phoneNumber:phoneNumber,
+            status:status
+          }
+        ]
+      })
+    }
   }
 
   async update(id: number, createPegawaiDto: UpdatePegawaiDto):Promise<Pegawai> {
@@ -30,6 +53,7 @@ export class PegawaiService {
   }
 
   async remove(id: number):Promise<object> {
+    await this.findOne(id);
     await this.pegawaiRepo.delete(id);
     return {deleted:"success"};
   }
